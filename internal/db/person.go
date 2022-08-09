@@ -6,12 +6,12 @@ import (
 )
 
 type Person struct {
-	email string
-	role  string
+	Email string
+	Role  string
 }
 
 func NewPerson(email string) iPerson {
-	return &Person{email: email}
+	return &Person{Email: email}
 }
 
 type iPerson interface {
@@ -24,9 +24,9 @@ func (p Person) GetPerson() (model.Person, error) {
 
 	defer db.Close()
 
-	query := `SELECT * FROM person WHERE email = $1;`
+	query := `SELECT * FROM person WHERE Email = $1;`
 
-	row := db.QueryRow(query, p.email)
+	row := db.QueryRow(query, p.Email)
 
 	err := row.Scan(&person.Email, &person.Email, &person.Role)
 

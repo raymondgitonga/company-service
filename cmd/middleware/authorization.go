@@ -20,10 +20,6 @@ type Authorization struct {
 
 func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	secretKey := os.Getenv("JWT_SECRET_KEY")
-	var mySigningKey = []byte(secretKey)
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
 
 	person, err := db.NewPerson(email).GetPerson()
 
@@ -42,13 +38,7 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(jsonResponse)
 		return
 	}
-
-	claims["authorized"] = true
-	claims["email"] = email
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
-	claims["role"] = person.Role
-
-	tokenString, err := token.SignedString(mySigningKey)
+	tokenString, err := generate(email, person.Role)
 
 	if err != nil {
 		err := fmt.Sprintf("something went wrong: %s", err.Error())
@@ -70,7 +60,7 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 
 	authorization := Authorization{
 		Message:    "success",
-		Expiration: time.Now().Add(time.Minute * 30),
+		Expiration: time.Now().Add(time.Minute * 43200),
 		Email:      email,
 		Token:      tokenString,
 	}
@@ -103,4 +93,18 @@ func IsAuthorized(tokenString string) (bool, error) {
 	} else {
 		return false, errors.New(fmt.Sprintf("error validating token: %s", err.Error()))
 	}
+}
+
+func generate(email string, role string) (string, error) {
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	var mySigningKey = []byte(secretKey)
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["authorized"] = true
+	claims["email"] = email
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["role"] = role
+
+	return token.SignedString(mySigningKey)
 }
