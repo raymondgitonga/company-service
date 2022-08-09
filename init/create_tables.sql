@@ -1,7 +1,7 @@
 create table person
 (
     personId serial PRIMARY KEY,
-    email   varchar(50) unique not null
+    email   varchar(50) unique not null,
 );
 
 create table company

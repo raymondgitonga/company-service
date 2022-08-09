@@ -1,4 +1,4 @@
-package db
+package config
 
 import (
 	"database/sql"
@@ -8,14 +8,14 @@ import (
 	"os"
 )
 
-func createDBConnection() *sql.DB {
+func CreateDBConnection() *sql.DB {
 	err := godotenv.Load(".env")
 
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
-	db, err := Initialise(
+	db, err := initialiseDB(
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB"),
@@ -28,7 +28,7 @@ func createDBConnection() *sql.DB {
 	return db
 }
 
-func Initialise(userName string, password string, dbName string) (*sql.DB, error) {
+func initialiseDB(userName string, password string, dbName string) (*sql.DB, error) {
 	connectionString := fmt.Sprintf("port=5432 user=%s password=%s dbname=%s sslmode=disable", userName, password, dbName)
 	DB, err := sql.Open("postgres", connectionString)
 
