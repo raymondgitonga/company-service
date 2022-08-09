@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/raymondgitonga/company-service/internal/db"
@@ -24,9 +25,28 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
+	person, err := db.NewPerson(email).GetPerson()
+
+	if err != nil || len(person.Email) <= 0 {
+		authorization := Authorization{
+			Message:    "user does not exist",
+			Expiration: time.Time{},
+			Email:      email,
+			Token:      "",
+		}
+
+		jsonResponse, _ := json.Marshal(authorization)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write(jsonResponse)
+		return
+	}
+
 	claims["authorized"] = true
 	claims["email"] = email
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["role"] = person.Role
 
 	tokenString, err := token.SignedString(mySigningKey)
 
@@ -48,24 +68,6 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := db.NewPerson(email).PersonExists()
-
-	if !exists || err != nil {
-		authorization := Authorization{
-			Message:    "user does not exist",
-			Expiration: time.Time{},
-			Email:      email,
-			Token:      "",
-		}
-
-		jsonResponse, _ := json.Marshal(authorization)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write(jsonResponse)
-		return
-	}
-
 	authorization := Authorization{
 		Message:    "success",
 		Expiration: time.Now().Add(time.Minute * 30),
@@ -78,4 +80,27 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(jsonResponse)
+}
+
+func IsAuthorized(tokenString string) (bool, error) {
+	var hmacSampleSecret []byte
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return hmacSampleSecret, nil
+	})
+
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("error validating token: %s", err.Error()))
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if claims["role"] != "admin" {
+			return false, errors.New("operation not allowed for user")
+		}
+		return true, nil
+	} else {
+		return false, errors.New(fmt.Sprintf("error validating token: %s", err.Error()))
+	}
 }

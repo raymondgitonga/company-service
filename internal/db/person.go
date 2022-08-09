@@ -7,6 +7,7 @@ import (
 
 type Person struct {
 	email string
+	role  string
 }
 
 func NewPerson(email string) iPerson {
@@ -14,10 +15,10 @@ func NewPerson(email string) iPerson {
 }
 
 type iPerson interface {
-	PersonExists() (bool, error)
+	GetPerson() (model.Person, error)
 }
 
-func (p Person) PersonExists() (bool, error) {
+func (p Person) GetPerson() (model.Person, error) {
 	var person model.Person
 	db := config.CreateDBConnection()
 
@@ -27,11 +28,7 @@ func (p Person) PersonExists() (bool, error) {
 
 	row := db.QueryRow(query, p.email)
 
-	err := row.Scan(&person.Email, &person.Email)
+	err := row.Scan(&person.Email, &person.Email, &person.Role)
 
-	if len(person.Email) == 0 {
-		return false, err
-	}
-
-	return true, err
+	return person, err
 }

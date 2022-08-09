@@ -2,6 +2,7 @@ create table person
 (
     personId serial PRIMARY KEY,
     email   varchar(50) unique not null,
+    role varchar(50) unique not null
 );
 
 create table company
@@ -14,9 +15,9 @@ create table company
     phone      varchar(15) not null
 );
 
-insert into person (email)
-values ('raymond@test.com'),
-       ('gitonga@test.com');
+insert into person (email, role)
+values ('raymond@test.com', 'admin'),
+       ('gitonga@test.com', 'user');
 
 insert into company (name, code, country, website, phone)
 values ('Safaricom', 122, 'KE', 'www.saf.com', '7220000000')

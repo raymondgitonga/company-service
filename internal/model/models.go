@@ -12,4 +12,5 @@ type Company struct {
 type Person struct {
 	ID    int    `json:"personId"`
 	Email string `json:"email"`
+	Role  string `json:"role"`
 }
