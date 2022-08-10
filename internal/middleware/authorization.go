@@ -23,8 +23,6 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 
 	person, err := db.NewPerson(email).GetPerson()
 
-	fmt.Println(person)
-
 	if err != nil || len(person.Email) <= 0 {
 		authorization := Authorization{
 			Message:    "user does not exist",
@@ -69,7 +67,6 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, _ := json.Marshal(authorization)
 
-	fmt.Println(IsAuthorized(tokenString))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(jsonResponse)

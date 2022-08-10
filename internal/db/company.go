@@ -137,8 +137,6 @@ func (c *Company) UpdateCompany(id string) error {
 
 	queryString, err := c.buildUpdateQuery(query, id)
 
-	fmt.Println(queryString)
-
 	res, err := db.Exec(queryString)
 
 	if err != nil {

@@ -56,7 +56,7 @@ func CreateKafkaConnect(topic string, message []byte, ctx context.Context) error
 	defer func() {
 		err := writer.Close()
 		if err != nil {
-			fmt.Println("Error closing producer: ", err)
+			log.Println("Error closing producer: ", err)
 			return
 		}
 	}()
