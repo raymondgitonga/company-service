@@ -10,11 +10,11 @@ type Person struct {
 	Role  string
 }
 
-func NewPerson(email string) iPerson {
+func NewPerson(email string) IPerson {
 	return &Person{Email: email}
 }
 
-type iPerson interface {
+type IPerson interface {
 	GetPerson() (model.Person, error)
 }
 
