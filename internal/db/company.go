@@ -30,6 +30,7 @@ func NewCompany(name string, code string, country string, website string, phone 
 type ICompany interface {
 	GetCompanies() ([]Company, error)
 	GetCompany() (Company, error)
+	CreateCompany() error
 }
 
 func (c *Company) GetCompanies() ([]Company, error) {
@@ -82,6 +83,21 @@ func (c *Company) GetCompany() (Company, error) {
 
 	return company, nil
 
+}
+
+func (c *Company) CreateCompany() error {
+	db := config.CreateDBConnection()
+	defer db.Close()
+
+	query := `INSERT INTO company (name, code, country, website, phone) VALUES ($1, $2, $3, $4, $5)`
+
+	err := db.QueryRow(query, c.Name, c.Code, c.Country, c.Website, c.Phone)
+
+	if err != nil {
+		return err.Err()
+	}
+
+	return nil
 }
 
 func (c *Company) buildQueryString(query string) string {

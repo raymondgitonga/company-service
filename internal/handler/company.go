@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/raymondgitonga/company-service/internal/db"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -12,8 +13,8 @@ type CompaniesResponse struct {
 }
 
 type CompanyResponse struct {
-	Message string     `json:"message"`
-	Company db.Company `json:"company"`
+	Message string      `json:"message"`
+	Company *db.Company `json:"company"`
 }
 
 func GetCompanies(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +49,7 @@ func GetCompany(w http.ResponseWriter, r *http.Request) {
 
 	companyResponse := CompanyResponse{
 		Message: "success",
-		Company: res,
+		Company: &res,
 	}
 
 	if err != nil {
@@ -63,6 +64,49 @@ func GetCompany(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResponse)
+}
+
+func CreateCompany(w http.ResponseWriter, r *http.Request) {
+	req := db.Company{}
+
+	defer r.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		jsonResponse, _ := json.Marshal("message: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
+		return
+	}
+
+	err = json.Unmarshal(bodyBytes, &req)
+
+	if err != nil {
+		jsonResponse, _ := json.Marshal("message: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
+		return
+	}
+
+	company := db.NewCompany(req.Name, req.Code, req.Country, req.Website, req.Phone)
+
+	err = company.CreateCompany()
+
+	if err != nil {
+		jsonResponse, _ := json.Marshal("message: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
+		return
+	}
+
+	jsonResponse, _ := json.Marshal("message: success")
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+
 }
 
 func buildCompany(r *http.Request) db.ICompany {

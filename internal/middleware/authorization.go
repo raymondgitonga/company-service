@@ -23,6 +23,8 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 
 	person, err := db.NewPerson(email).GetPerson()
 
+	fmt.Println(person)
+
 	if err != nil || len(person.Email) <= 0 {
 		authorization := Authorization{
 			Message:    "user does not exist",
@@ -67,6 +69,7 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, _ := json.Marshal(authorization)
 
+	fmt.Println(IsAuthorized(tokenString))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(jsonResponse)
@@ -76,7 +79,6 @@ func Authorize(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		isAuth, err := IsAuthorized(token)
-
 		if err != nil || !isAuth {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Header().Set("Content-Type", "application/json")
@@ -88,19 +90,20 @@ func Authorize(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 func IsAuthorized(tokenString string) (bool, error) {
-	var hmacSampleSecret []byte
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return hmacSampleSecret, nil
-	})
-
-	if err != nil {
-		return false, errors.New(fmt.Sprintf("error validating token: %s", err.Error()))
+	var keyfunc jwt.Keyfunc = func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	parsed, err := jwt.Parse(tokenString, keyfunc)
+	if err != nil {
+		return false, err
+	}
+
+	if !parsed.Valid {
+		return false, err
+	}
+
+	if claims, ok := parsed.Claims.(jwt.MapClaims); ok && parsed.Valid {
 		if claims["role"] != "admin" {
 			return false, errors.New("operation not allowed for user")
 		}

@@ -22,6 +22,7 @@ func (a *App) Run(addr string) {
 	a.Router.HandleFunc("/authorize", middleware.GenerateJWT).Methods(http.MethodGet)
 	a.Router.HandleFunc("/companies", handler.GetCompanies).Methods(http.MethodGet)
 	a.Router.HandleFunc("/company", handler.GetCompany).Methods(http.MethodGet)
+	a.Router.HandleFunc("/company/create", middleware.ValidateLocation(middleware.Authorize(handler.CreateCompany))).Methods(http.MethodPost)
 
 	if err := http.ListenAndServe(addr, a.Router); err != nil {
 		log.Fatal("error connecting to server:  ", err.Error())
