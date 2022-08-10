@@ -13,22 +13,21 @@ Run the following to setup the database, kafka instance and to run the service
 ### Endpoints
 
 1. Get AuthToken - Used to get a jwt token for mutating operations . **GET** ``/authorize?email={email}``
- <br>
- * Kindly use the following emails already in the db **raymond@test.com** (has admin rights )or **gitonga@test.com** (no admin rights)
- <br><br>
+   <br>
+   Kindly use the following emails already in the db **raymond@test.com** (has admin rights ) or **gitonga@test.com** (no admin rights)
+   <br><br>
 
-2. Get Companies - Get a list of all companies. **GET**
-``/companies``
-  <br>
-  This endpoint accepts the following optional parameters you can use for filtering
-    * phone
-    * id
-    * name
-    * code
-    * country
-    * website
-    * phone
- <br><br>
+2. Get Companies - Get a list of all companies. **GET** ``/companies``
+   <br>
+   This endpoint accepts the following optional parameters you can use for filtering
+     * phone
+     * id
+     * name
+     * code
+     * country
+     * website
+     * phone
+   <br><br>
 
 3. Get Company - Get a single company. **GET** ``/company``
    <br>
@@ -40,7 +39,7 @@ Run the following to setup the database, kafka instance and to run the service
     * country
     * website
     * phone
-    <br><br>
+   <br><br>
 
 4. Create Company - Create a new company.  **POST** ``/company/create``
    <br>
