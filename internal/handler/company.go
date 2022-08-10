@@ -126,11 +126,13 @@ func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Builds a produce message to be sent to kafka topic once a deletion is done
 	produce := service.Produce{
 		Event:     "EVENT_DELETE",
 		CompanyId: strconv.Itoa(companyId),
 	}
 
+	// Sends delete message to kafka topic async
 	go produce.SendMutationMessage()
 
 	jsonResponse, _ := json.Marshal("message: success")
@@ -181,6 +183,7 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		CompanyId: companyId,
 	}
 
+	// Sends update message to kafka topic async
 	go produce.SendMutationMessage()
 
 	jsonResponse, _ := json.Marshal("message: success")

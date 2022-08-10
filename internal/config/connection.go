@@ -46,7 +46,7 @@ func initialiseDB(userName string, password string, dbName string) (*sql.DB, err
 	return DB, err
 }
 
-func Connect(topic string, message []byte, ctx context.Context) error {
+func CreateKafkaConnect(topic string, message []byte, ctx context.Context) error {
 	writer := &kafka.Writer{
 		Addr:                   kafka.TCP("localhost:9092"),
 		Topic:                  topic,

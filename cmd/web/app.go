@@ -23,8 +23,8 @@ func (a *App) Run(addr string) {
 	a.Router.HandleFunc("/companies", handler.GetCompanies).Methods(http.MethodGet)
 	a.Router.HandleFunc("/company", handler.GetCompany).Methods(http.MethodGet)
 	a.Router.HandleFunc("/company/create", middleware.ValidateLocation(middleware.Authorize(handler.CreateCompany))).Methods(http.MethodPost)
-	a.Router.HandleFunc("/company/delete", handler.DeleteCompany).Methods(http.MethodDelete)
-	a.Router.HandleFunc("/company/update", handler.UpdateCompany).Methods(http.MethodPut)
+	a.Router.HandleFunc("/company/delete", middleware.ValidateLocation(middleware.Authorize(handler.DeleteCompany))).Methods(http.MethodDelete)
+	a.Router.HandleFunc("/company/update", middleware.ValidateLocation(middleware.Authorize(handler.UpdateCompany))).Methods(http.MethodPut)
 	if err := http.ListenAndServe(addr, a.Router); err != nil {
 		log.Fatal("error connecting to server:  ", err.Error())
 	}

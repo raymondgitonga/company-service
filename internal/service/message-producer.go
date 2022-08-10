@@ -24,7 +24,7 @@ func (p Produce) SendMutationMessage() {
 		return
 	}
 
-	err = config.Connect("company-service", message, context.Background())
+	err = config.CreateKafkaConnect("company-service", message, context.Background())
 
 	if err != nil {
 		log.Printf("Error sending message %s", err)

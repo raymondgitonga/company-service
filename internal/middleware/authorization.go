@@ -75,6 +75,7 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResponse)
 }
 
+// Authorize checks if a request is authorized
 func Authorize(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
@@ -113,6 +114,7 @@ func IsAuthorized(tokenString string) (bool, error) {
 	}
 }
 
+// generate generates a jwt token
 func generate(email string, role string) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	var mySigningKey = []byte(secretKey)
