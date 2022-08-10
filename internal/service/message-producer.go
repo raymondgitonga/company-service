@@ -27,6 +27,6 @@ func (p Produce) SendMutationMessage() {
 	err = config.Connect("company-service", message, context.Background())
 
 	if err != nil {
-		log.Fatalf("Error sending message %s", err)
+		log.Printf("Error sending message %s", err)
 	}
 }
