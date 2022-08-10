@@ -72,6 +72,21 @@ func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResponse)
 }
 
+func Authorize(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+		isAuth, err := IsAuthorized(token)
+
+		if err != nil || !isAuth {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(err.Error()))
+			return
+		}
+		handler(w, r)
+	}
+}
+
 func IsAuthorized(tokenString string) (bool, error) {
 	var hmacSampleSecret []byte
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
