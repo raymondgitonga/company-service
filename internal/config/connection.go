@@ -46,47 +46,33 @@ func initialiseDB(userName string, password string, dbName string) (*sql.DB, err
 	return DB, err
 }
 
-func ConnectKafka(topic string, ctx context.Context, msgChan chan Received) {
-	defer close(msgChan)
-
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"localhost:9092"},
-		Topic:    topic,
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
-	})
-	err := reader.SetOffset(1)
+func Connect(topic string, message []byte, ctx context.Context) error {
+	writer := &kafka.Writer{
+		Addr:                   kafka.TCP("localhost:9092"),
+		Topic:                  topic,
+		AllowAutoTopicCreation: true,
+	}
 
 	defer func() {
-		err := reader.Close()
+		err := writer.Close()
 		if err != nil {
-			fmt.Println("Error closing consumer: ", err)
+			fmt.Println("Error closing producer: ", err)
 			return
 		}
-		fmt.Println("Consumer closed")
 	}()
 
+	err := writer.WriteMessages(
+		ctx,
+		kafka.Message{
+			Key:   []byte("Key-A"),
+			Value: message,
+		},
+	)
+
 	if err != nil {
-		log.Printf("Failed to set offset %s", err)
+		return err
 	}
+	log.Print("message sent: ", string(message))
 
-	for {
-		message, err := reader.ReadMessage(ctx)
-		if err != nil {
-			if err == context.Canceled {
-				fmt.Println("Signal interrupt error ", err)
-				break
-			}
-			fmt.Println("Error reading message ", err)
-			break
-		}
-
-		msgChan <- Received{
-			Message: string(message.Value),
-			Offset:  message.Offset,
-		}
-	}
-	if err := reader.Close(); err != nil {
-		log.Fatal("failed to close reader:", err)
-	}
+	return err
 }

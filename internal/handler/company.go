@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/raymondgitonga/company-service/internal/db"
+	"github.com/raymondgitonga/company-service/internal/service"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -125,6 +126,13 @@ func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	produce := service.Produce{
+		Event:     "EVENT_DELETE",
+		CompanyId: strconv.Itoa(companyId),
+	}
+
+	go produce.SendMutationMessage()
+
 	jsonResponse, _ := json.Marshal("message: success")
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
@@ -167,6 +175,13 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+
+	produce := service.Produce{
+		Event:     "EVENT_UPDATE",
+		CompanyId: companyId,
+	}
+
+	go produce.SendMutationMessage()
 
 	jsonResponse, _ := json.Marshal("message: success")
 	w.WriteHeader(http.StatusOK)
