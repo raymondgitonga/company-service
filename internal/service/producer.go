@@ -26,7 +26,7 @@ func (p Produce) SendMutationMessage() {
 		return
 	}
 
-	writer := config.InitKafka("company-service")
+	writer := config.CreateKafkaConnection("company-service")
 
 	err = writer.WriteMessages(
 		ctx,

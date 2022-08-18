@@ -9,11 +9,6 @@ import (
 	"os"
 )
 
-type Received struct {
-	Message string
-	Offset  int64
-}
-
 func CreateDBConnection() *sql.DB {
 	err := godotenv.Load(".env")
 
@@ -34,24 +29,12 @@ func CreateDBConnection() *sql.DB {
 	return db
 }
 
-func initialiseDB(userName string, password string, dbName string) (*sql.DB, error) {
-	connectionString := fmt.Sprintf("port=5432 user=%s password=%s dbname=%s sslmode=disable", userName, password, dbName)
-	DB, err := sql.Open("postgres", connectionString)
-
-	err = DB.Ping()
-	if err != nil {
-		panic(err)
-	}
-	return DB, err
-}
-
-func InitKafka(topic string) *kafka.Writer {
+func CreateKafkaConnection(topic string) *kafka.Writer {
 	writer := &kafka.Writer{
-		Addr:                   kafka.TCP("localhost:9092"),
+		Addr:                   kafka.TCP(os.Getenv("KAFKA_ADDRESS")),
 		Topic:                  topic,
 		AllowAutoTopicCreation: true,
 	}
-
 	defer func() {
 		err := writer.Close()
 		if err != nil {
@@ -59,6 +42,18 @@ func InitKafka(topic string) *kafka.Writer {
 			return
 		}
 	}()
-
 	return writer
+}
+
+func initialiseDB(userName string, password string, dbName string) (*sql.DB, error) {
+	connectionString := fmt.Sprintf("port=5432 user=%s password=%s dbname=%s sslmode=disable", userName, password, dbName)
+	DB, err := sql.Open("postgres", connectionString)
+
+	fmt.Println(connectionString)
+
+	err = DB.Ping()
+	if err != nil {
+		panic(err)
+	}
+	return DB, err
 }
