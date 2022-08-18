@@ -1,7 +1,6 @@
 package config
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -46,7 +45,7 @@ func initialiseDB(userName string, password string, dbName string) (*sql.DB, err
 	return DB, err
 }
 
-func CreateKafkaConnect(topic string, message []byte, ctx context.Context) error {
+func InitKafka(topic string) *kafka.Writer {
 	writer := &kafka.Writer{
 		Addr:                   kafka.TCP("localhost:9092"),
 		Topic:                  topic,
@@ -61,18 +60,5 @@ func CreateKafkaConnect(topic string, message []byte, ctx context.Context) error
 		}
 	}()
 
-	err := writer.WriteMessages(
-		ctx,
-		kafka.Message{
-			Key:   []byte("Key-A"),
-			Value: message,
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-	log.Print("message sent: ", string(message))
-
-	return err
+	return writer
 }
