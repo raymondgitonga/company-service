@@ -1,4 +1,4 @@
-package db
+package repository
 
 import (
 	"github.com/raymondgitonga/company-service/internal/config"
@@ -7,14 +7,13 @@ import (
 
 type Person struct {
 	Email string
-	Role  string
 }
 
-func NewPerson(email string) IPerson {
+func NewPerson(email string) PersonRepository {
 	return &Person{Email: email}
 }
 
-type IPerson interface {
+type PersonRepository interface {
 	GetPerson() (model.Person, error)
 }
 

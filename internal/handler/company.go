@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/raymondgitonga/company-service/internal/db"
+	"github.com/raymondgitonga/company-service/internal/repository"
 	"github.com/raymondgitonga/company-service/internal/service"
 	"io/ioutil"
 	"net/http"
@@ -10,17 +10,17 @@ import (
 )
 
 type CompaniesResponse struct {
-	Message   string       `json:"message"`
-	Companies []db.Company `json:"companies"`
+	Message   string               `json:"message"`
+	Companies []repository.Company `json:"companies"`
 }
 
 type CompanyResponse struct {
-	Message string      `json:"message"`
-	Company *db.Company `json:"company"`
+	Message string              `json:"message"`
+	Company *repository.Company `json:"company"`
 }
 
 func GetCompanies(w http.ResponseWriter, r *http.Request) {
-	company := buildCompany(r)
+	company := buildCompanyStruct(r)
 
 	res, err := company.GetCompanies()
 
@@ -45,7 +45,7 @@ func GetCompanies(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCompany(w http.ResponseWriter, r *http.Request) {
-	company := buildCompany(r)
+	company := buildCompanyStruct(r)
 
 	res, err := company.GetCompany()
 
@@ -69,7 +69,7 @@ func GetCompany(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateCompany(w http.ResponseWriter, r *http.Request) {
-	req := db.Company{}
+	req := repository.Company{}
 
 	defer r.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -92,7 +92,7 @@ func CreateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	company := db.NewCompany(req.ID, req.Name, req.Code, req.Country, req.Website, req.Phone)
+	company := repository.NewCompany(req.ID, req.Name, req.Code, req.Country, req.Website, req.Phone)
 
 	err = company.CreateCompany()
 
@@ -114,7 +114,7 @@ func CreateCompany(w http.ResponseWriter, r *http.Request) {
 func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 	companyId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 
-	company := db.NewCompany(companyId, "", "", "", "", "")
+	company := repository.NewCompany(companyId, "", "", "", "", "")
 
 	err := company.DeleteCompany()
 
@@ -143,7 +143,7 @@ func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 
 func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	companyId := r.URL.Query().Get("id")
-	req := db.Company{}
+	req := repository.Company{}
 
 	defer r.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -166,7 +166,7 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	company := db.NewCompany(0, req.Name, req.Code, req.Country, req.Website, req.Phone)
+	company := repository.NewCompany(0, req.Name, req.Code, req.Country, req.Website, req.Phone)
 
 	err = company.UpdateCompany(companyId)
 
@@ -192,7 +192,7 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-func buildCompany(r *http.Request) db.ICompany {
+func buildCompanyStruct(r *http.Request) repository.CompanyRepository {
 	id, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	name := r.URL.Query().Get("name")
 	code := r.URL.Query().Get("code")
@@ -200,7 +200,7 @@ func buildCompany(r *http.Request) db.ICompany {
 	website := r.URL.Query().Get("website")
 	phone := r.URL.Query().Get("phone")
 
-	company := db.NewCompany(id, name, code, country, website, phone)
+	company := repository.NewCompany(id, name, code, country, website, phone)
 
 	return company
 }

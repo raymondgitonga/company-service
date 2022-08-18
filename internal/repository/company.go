@@ -1,4 +1,4 @@
-package db
+package repository
 
 import (
 	"errors"
@@ -14,10 +14,9 @@ type Company struct {
 	Country string `json:"country"`
 	Website string `json:"website"`
 	Phone   string `json:"phone"`
-	//Email   string `json:"email"`
 }
 
-func NewCompany(id int, name string, code string, country string, website string, phone string) ICompany {
+func NewCompany(id int, name string, code string, country string, website string, phone string) CompanyRepository {
 	return &Company{
 		ID:      id,
 		Name:    name,
@@ -29,7 +28,7 @@ func NewCompany(id int, name string, code string, country string, website string
 	}
 }
 
-type ICompany interface {
+type CompanyRepository interface {
 	GetCompanies() ([]Company, error)
 	GetCompany() (Company, error)
 	CreateCompany() error

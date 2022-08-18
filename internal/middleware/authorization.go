@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
-	"github.com/raymondgitonga/company-service/internal/db"
+	"github.com/raymondgitonga/company-service/internal/repository"
 	"net/http"
 	"os"
 	"time"
@@ -21,7 +21,7 @@ type Authorization struct {
 func GenerateJWT(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 
-	person, err := db.NewPerson(email).GetPerson()
+	person, err := repository.NewPerson(email).GetPerson()
 
 	if err != nil || len(person.Email) <= 0 {
 		authorization := Authorization{
