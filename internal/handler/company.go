@@ -114,7 +114,7 @@ func CreateCompany(w http.ResponseWriter, r *http.Request) {
 func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 	companyId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 
-	company := repository.NewCompany(companyId, "", "", "", "", "")
+	company := service.NewCompany(companyId, "", "", "", "", "")
 
 	err := company.DeleteCompany()
 
@@ -125,15 +125,6 @@ func DeleteCompany(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-
-	// Builds a produce message to be sent to kafka topic once a deletion is done
-	produce := service.Produce{
-		Event:     "EVENT_DELETE",
-		CompanyId: strconv.Itoa(companyId),
-	}
-
-	// Sends delete message to kafka topic async
-	go produce.SendMutationMessage()
 
 	jsonResponse, _ := json.Marshal("message: success")
 	w.WriteHeader(http.StatusOK)
@@ -192,7 +183,7 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-func buildCompanyStruct(r *http.Request) repository.CompanyRepository {
+func buildCompanyStruct(r *http.Request) service.CompanyService {
 	id, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	name := r.URL.Query().Get("name")
 	code := r.URL.Query().Get("code")
@@ -200,7 +191,7 @@ func buildCompanyStruct(r *http.Request) repository.CompanyRepository {
 	website := r.URL.Query().Get("website")
 	phone := r.URL.Query().Get("phone")
 
-	company := repository.NewCompany(id, name, code, country, website, phone)
+	company := service.NewCompany(id, name, code, country, website, phone)
 
 	return company
 }

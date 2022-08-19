@@ -24,7 +24,6 @@ func NewCompany(id int, name string, code string, country string, website string
 		Country: country,
 		Website: website,
 		Phone:   phone,
-		//Email:   email,
 	}
 }
 
